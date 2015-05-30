@@ -84,22 +84,27 @@ static int application_applicationsforbundleid(lua_State* L) {
 /// Returns all open windows owned by the given app.
 static int application_allwindows(lua_State* L) {
     AXUIElementRef app = get_app(L, 1);
-    
+
+    NSDate *start = [[NSDate date] retain];
     lua_newtable(L);
-    
+
     CFArrayRef windows;
     AXError result = AXUIElementCopyAttributeValues(app, kAXWindowsAttribute, 0, 100, &windows);
     if (result == kAXErrorSuccess) {
         for (NSInteger i = 0; i < CFArrayGetCount(windows); i++) {
             AXUIElementRef win = CFArrayGetValueAtIndex(windows, i);
             CFRetain(win);
-            
+
             new_window(L, win);
             lua_rawseti(L, -2, (int)(i + 1));
         }
         CFRelease(windows);
     }
-    
+
+    NSTimeInterval timeInterval = [start timeIntervalSinceNow];
+    NSLog(@"%.20f", timeInterval);
+    [start release];
+
     return 1;
 }
 
